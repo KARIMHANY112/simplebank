@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"c:\\\\Users\\\\karim\\\\development\\\\simplebank\")",
+      "Bash(dir \"c:\\\\Users\\\\karim\\\\development\\\\simplebank\\\\db\" /s /b)",
+      "Bash(sqlc version *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(sqlc generate *)",
+      "Bash(go mod *)",
+      "Bash(go build *)",
+      "Bash(go get *)"
+    ]
+  }
+}
