@@ -1,85 +1,42 @@
 package util
 
 import (
-    "bufio"
-    "errors"
-    "fmt"
-    "os"
-    "path/filepath"
-    "strings"
-    "time"
+	"time"
+
+	"github.com/spf13/viper"
 )
 
-// Config stores all configuration values for the application.
+// Config stores all configuration of the application.
+// The values are read by viper from a config file or environment variable.
 type Config struct {
-    DBSource             string        `mapstructure:"DB_SOURCE"`
-    TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
-    AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
-    RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	Environment          string        `mapstructure:"ENVIRONMENT"`
+	AllowedOrigins       []string      `mapstructure:"ALLOWED_ORIGINS"`
+	DBSource             string        `mapstructure:"DB_SOURCE"`
+	MigrationURL         string        `mapstructure:"MIGRATION_URL"`
+	RedisAddress         string        `mapstructure:"REDIS_ADDRESS"`
+	HTTPServerAddress    string        `mapstructure:"HTTP_SERVER_ADDRESS"`
+	GRPCServerAddress    string        `mapstructure:"GRPC_SERVER_ADDRESS"`
+	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	EmailSenderName      string        `mapstructure:"EMAIL_SENDER_NAME"`
+	EmailSenderAddress   string        `mapstructure:"EMAIL_SENDER_ADDRESS"`
+	EmailSenderPassword  string        `mapstructure:"EMAIL_SENDER_PASSWORD"`
 }
 
-// LoadConfig reads configuration from a .env-style file and environment variables.
-// It looks for an app.env file in the provided path and loads values from it.
+// LoadConfig reads configuration from file or environment variables.
 func LoadConfig(path string) (config Config, err error) {
-    envFile := filepath.Join(path, "app.env")
-    if _, statErr := os.Stat(envFile); statErr == nil {
-        if err = loadEnvFile(envFile); err != nil {
-            return config, err
-        }
-    }
+	viper.AddConfigPath(path)
+	viper.SetConfigName("app")
+	viper.SetConfigType("env")
 
-    config.DBSource = os.Getenv("DB_SOURCE")
-    if config.DBSource == "" {
-        return config, errors.New("DB_SOURCE is not set")
-    }
+	viper.AutomaticEnv()
 
-    config.TokenSymmetricKey = os.Getenv("TOKEN_SYMMETRIC_KEY")
-    if config.TokenSymmetricKey == "" {
-        return config, errors.New("TOKEN_SYMMETRIC_KEY is not set")
-    }
+	err = viper.ReadInConfig()
+	if err != nil {
+		return
+	}
 
-    config.AccessTokenDuration, err = time.ParseDuration(os.Getenv("ACCESS_TOKEN_DURATION"))
-    if err != nil {
-        return config, fmt.Errorf("invalid ACCESS_TOKEN_DURATION: %w", err)
-    }
-
-    config.RefreshTokenDuration, err = time.ParseDuration(os.Getenv("REFRESH_TOKEN_DURATION"))
-    if err != nil {
-        return config, fmt.Errorf("invalid REFRESH_TOKEN_DURATION: %w", err)
-    }
-
-    return config, nil
-}
-
-func loadEnvFile(path string) error {
-    file, err := os.Open(path)
-    if err != nil {
-        return err
-    }
-    defer file.Close()
-
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        line := strings.TrimSpace(scanner.Text())
-        if line == "" || strings.HasPrefix(line, "#") {
-            continue
-        }
-
-        parts := strings.SplitN(line, "=", 2)
-        if len(parts) != 2 {
-            continue
-        }
-
-        key := strings.TrimSpace(parts[0])
-        val := strings.TrimSpace(parts[1])
-        if key == "" {
-            continue
-        }
-
-        if _, exists := os.LookupEnv(key); !exists {
-            os.Setenv(key, strings.Trim(val, `"`))
-        }
-    }
-
-    return scanner.Err()
+	err = viper.Unmarshal(&config)
+	return
 }

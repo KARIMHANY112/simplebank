@@ -2,12 +2,12 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
-	"github.com/techschool/simplebank/util"
+	"github.com/simplebank/util"
 )
 
 func createRandomUser(t *testing.T) User {
@@ -59,7 +59,7 @@ func TestUpdateUserOnlyFullName(t *testing.T) {
 	newFullName := util.RandomOwner()
 	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
-		FullName: pgtype.Text{
+		FullName: sql.NullString{
 			String: newFullName,
 			Valid:  true,
 		},
@@ -78,7 +78,7 @@ func TestUpdateUserOnlyEmail(t *testing.T) {
 	newEmail := util.RandomEmail()
 	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
-		Email: pgtype.Text{
+		Email: sql.NullString{
 			String: newEmail,
 			Valid:  true,
 		},
@@ -100,7 +100,7 @@ func TestUpdateUserOnlyPassword(t *testing.T) {
 
 	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
-		HashedPassword: pgtype.Text{
+		HashedPassword: sql.NullString{
 			String: newHashedPassword,
 			Valid:  true,
 		},
@@ -124,15 +124,15 @@ func TestUpdateUserAllFields(t *testing.T) {
 
 	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
-		FullName: pgtype.Text{
+		FullName: sql.NullString{
 			String: newFullName,
 			Valid:  true,
 		},
-		Email: pgtype.Text{
+		Email: sql.NullString{
 			String: newEmail,
 			Valid:  true,
 		},
-		HashedPassword: pgtype.Text{
+		HashedPassword: sql.NullString{
 			String: newHashedPassword,
 			Valid:  true,
 		},

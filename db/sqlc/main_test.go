@@ -1,13 +1,13 @@
 package db
 
 import (
-	"context"
+	"database/sql"
 	"log"
 	"os"
 	"testing"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/techschool/simplebank/util"
+	_ "github.com/lib/pq"
+	"github.com/simplebank/util"
 )
 
 var testStore Store
@@ -18,11 +18,11 @@ func TestMain(m *testing.M) {
 		log.Fatal("cannot load config:", err)
 	}
 
-	connPool, err := pgxpool.New(context.Background(), config.DBSource)
+	conn, err := sql.Open("postgres", config.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
 
-	testStore = NewStore(connPool)
+	testStore = NewStore(conn)
 	os.Exit(m.Run())
 }

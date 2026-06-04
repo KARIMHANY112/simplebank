@@ -10,5 +10,9 @@
       "Bash(go build *)",
       "Bash(go get *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "ruflo"
+  ],
+  "enableAllProjectMcpServers": true
 }
