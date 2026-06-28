@@ -5,17 +5,24 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/simplebank/util"
+	"github.com/stretchr/testify/require"
 )
 
 func createRandomAccount(t *testing.T) Account {
 	user := createRandomUser(t)
+	return createRandomAccountForOwner(t, user.Username)
+}
 
+func createRandomAccountForOwner(t *testing.T, owner string) Account {
+	return createRandomAccountForOwnerAndCurrency(t, owner, util.RandomCurrency())
+}
+
+func createRandomAccountForOwnerAndCurrency(t *testing.T, owner, currency string) Account {
 	arg := CreateAccountParams{
-		Owner:    user.Username,
+		Owner:    owner,
 		Balance:  util.RandomMoney(),
-		Currency: util.RandomCurrency(),
+		Currency: currency,
 	}
 
 	account, err := testStore.CreateAccount(context.Background(), arg)
@@ -80,12 +87,14 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
+	user := createRandomUser(t)
 	var lastAccount Account
-	for i := 0; i < 10; i++ {
-		lastAccount = createRandomAccount(t)
+	for _, currency := range []string{util.USD, util.EUR, util.CAD} {
+		lastAccount = createRandomAccountForOwnerAndCurrency(t, user.Username, currency)
 	}
 
 	arg := ListAccountsParams{
+		Owner:  lastAccount.Owner,
 		Limit:  5,
 		Offset: 0,
 	}
