@@ -9,7 +9,7 @@ dropdb:
 	docker exec -it postgres dropdb simple_bank
 
 migrateup:
-	migrate -path db/migration -database "$(DB_SOURCE)" -verbose up
+	migrate -path db/migration -database "postgresql://postgres:k7Q6hht4YxxfXM6tXTeq@simple-bank.c1ee86000203.eu-west-1.rds.amazonaws.com:5432/simple_bank" -verbose up
 
 sqlc:
 	sqlc generate	
