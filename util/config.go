@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const defaultDBSource = "postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable"
+
 // Config stores all configuration of the application.
 // The values are read by viper from a config file or environment variable.
 type Config struct {
@@ -30,13 +32,19 @@ func LoadConfig(path string) (config Config, err error) {
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")
 
+	viper.SetDefault("DB_SOURCE", defaultDBSource)
 	viper.AutomaticEnv()
 
 	err = viper.ReadInConfig()
 	if err != nil {
-		return
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return
+		}
 	}
 
 	err = viper.Unmarshal(&config)
+	if err == nil && config.DBSource == "" {
+		config.DBSource = defaultDBSource
+	}
 	return
 }
