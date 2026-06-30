@@ -52,8 +52,11 @@ jobs:
         which migrate
 
     - name: Run migrations
+      env:
+        DB_SOURCE: postgresql://postgres:postgres@localhost:5432/simple_bank?sslmode=disable
       run: |
-        make migrateup
+        echo "$DB_SOURCE"
+        migrate -path db/migration -database "$DB_SOURCE" -verbose up
 
     - name: Show migration status
       env:
