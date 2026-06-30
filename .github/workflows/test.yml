@@ -52,7 +52,15 @@ jobs:
         which migrate
 
     - name: Run migrations
-      run: make migrateup
+      run: |
+        make migrateup
+
+    - name: Show migration status
+      env:
+        PGPASSWORD: postgres
+      run: |
+        psql -h localhost -U postgres -d simple_bank -c "\dt"
+        psql -h localhost -U postgres -d simple_bank -c "SELECT * FROM schema_migrations;"
 
     - name: Test
       run: make test
